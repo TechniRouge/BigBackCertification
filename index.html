@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Big Back Certification Quiz</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f5f5f5; }
+    h1, h2 { text-align: center; }
+    form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .question { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 5px; }
+    input[type="text"], input[type="email"] { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
+    button { padding: 10px 20px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #45a049; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init("fBwObR_tKYEjPcn4G");
+    })();
+
+    function submitQuiz(event) {
+      event.preventDefault();
+
+      const name = document.getElementById("name").value;
+      const email = document.getElementById("email").value;
+
+      const formData = new FormData(document.getElementById("quizForm"));
+      let score = 0;
+      let output = "";
+
+      const correctAnswers = [
+        "c","b","a","b","a","d","b","a","b","b",
+        "b","c","b","c","b","a","c","a","b","c",
+        "b","b","b","b","b","d","b","a","c","c"
+      ];
+
+      for (let i = 0; i < 30; i++) {
+        const answer = formData.get(`q${i + 1}`);
+        if (answer === correctAnswers[i]) score++;
+        output += `Question ${i + 1}: ${answer || "No answer"}\n`;
+      }
+
+      const templateParams = {
+        to_name: name,
+        to_email: email,
+        message: `Score: ${score}/30\n\n${output}`
+      };
+
+      emailjs.send("Big_back", "template_0br65x8", templateParams)
+        .then(() => alert("Results sent to your email!"))
+        .catch((error) => console.error("EmailJS Error:", error));
+    }
+  </script>
+</head>
+<body>
+  <h1>Big Back Certification Quiz</h1>
+  <form id="quizForm" onsubmit="submitQuiz(event)">
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required />
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required />
+
+    <div id="questions"></div>
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const questions = `What is the most logical reason a Big Back eats an entire pizza in one sitting?|a) They’re secretly training for a pizza-eating competition|b) They forgot they ordered extra cheese|c) They just really, really like pizza|d) They lost a bet
+Which of these best describes a Big Back’s reaction when faced with a buffet?|a) They panic and grab everything in sight|b) They carefully plan a strategy to sample every dish|c) They ignore the food and leave after 5 minutes|d) They only eat the breadsticks
+How does a Big Back feel after consuming a full 12-inch sandwich?|a) Satisfied but not full enough to stop|b) They start a food fight with the sandwich crusts|c) They need a nap immediately|d) They immediately look for dessert
+A Big Back’s ideal breakfast consists of:|a) A smoothie and a granola bar|b) Pancakes, bacon, eggs, and hash browns|c) A muffin and a coffee|d) A single slice of toast
+What is the main factor that determines a Big Back’s hunger level?|a) How much food is available in the house|b) How much exercise they've done that day|c) The number of food commercials they've watched|d) Their current mood
+When dining with friends, what is a Big Back’s first question?|a) "How much food are we ordering?"|b) "Should I bring my own snacks?"|c) "Who’s paying for the extra appetizers?"|d) "What’s the biggest thing on the menu?"
+What is a Big Back's reaction when they realize there’s no more food on their plate?|a) They wait patiently for someone to offer them more|b) They start looking around for any leftover crumbs|c) They declare, "I’m done," and leave|d) They start planning their next meal
+What would a Big Back consider an acceptable snack?|a) A full meal, with dessert included|b) A handful of chips|c) A single apple|d) A couple of crackers
+What is the main reason a Big Back chooses to eat at a buffet?|a) To try new foods|b) To see how much they can eat|c) To meet friends and socialize|d) Because it’s the cheapest option
+What would a Big Back be most likely to order at a fast food restaurant?|a) A small salad with dressing on the side|b) A large burger, extra fries, and a milkshake|c) A single slice of pizza|d) A water and a fruit cup
+How does a Big Back feel when they see someone leave food on their plate?|a) Confused|b) Relieved, because they think they’ll get to finish it|c) Indifferent|d) Angry
+What is the key to a Big Back’s eating success?|a) Portion control|b) Eating slowly|c) Eating as much as possible|d) Sticking to healthy foods
+What’s a Big Back’s reaction when they see dessert options?|a) "I’ll skip dessert"|b) "One dessert is never enough"|c) "Dessert is the main course!"|d) "Only if I’m hungry"
+What is a Big Back’s most likely response when asked if they want seconds?|a) "I’m too full"|b) "Only if it’s the same"|c) "I want thirds too"|d) "No thanks"
+What is the most common excuse a Big Back makes?|a) "It’s a special occasion!"|b) "I’m just really hungry today"|c) "Food challenge"|d) "Food competition"
+When a Big Back eats, what’s the first food they go for?|a) Main course|b) Appetizer|c) Sides|d) Dessert
+What would a Big Back do with a giant portion?|a) Refuse|b) Ask for more fries|c) Accept and finish it|d) Leave half
+What is a Big Back’s strategy at an "all-you-can-eat"?|a) Eat until they can't move|b) Normal meal and leave|c) Just appetizers|d) Only drinks
+How does a Big Back handle leftovers?|a) Save them|b) Throw them out|c) Eat them immediately|d) Let others eat them
+What dessert is just a snack to a Big Back?|a) Slice of cake|b) Full cake|c) Cookie|d) Small ice cream
+Ideal Big Back drink with large meal?|a) Water|b) Soda|c) Milkshake|d) Juice
+What’s a Big Back’s next move after a meal?|a) Take a walk|b) Plan next meal|c) Sleep|d) Eat more
+Comfort food of a Big Back?|a) Slice of pizza|b) Large bowl of pasta|c) Mountain of snacks|d) Light salad
+How do Big Backs eat?|a) Small bites|b) Eat fast, eat lots|c) Moderation|d) Slow and steady
+First thought in the morning?|a) Workout|b) Breakfast|c) Tasks|d) Last meal
+What’s too much food to a Big Back?|a) Multi-course meal|b) Not filling portion|c) Giant pizza|d) No such thing
+Role in group meal?|a) Orders last|b) Orders biggest|c) Suggests healthy|d) Shares food
+Leftovers from family dinner?|a) Wait to claim|b) Leave them|c) Make recipe|d) Don’t take any
+How often do they think about food?|a) Once|b) After snacks|c) Constantly|d) When hungry
+Unlimited buffet access for a week?|a) Eat healthy|b) Diet|c) Try every dish|d) One plate`;
+
+    const container = document.getElementById("questions");
+    const splitQuestions = questions.split("\n");
+    splitQuestions.forEach((line, i) => {
+      const [q, ...opts] = line.split("|");
+      const div = document.createElement("div");
+      div.classList.add("question");
+      div.innerHTML = `<p><strong>${i + 1}. ${q}</strong></p>` +
+        opts.map((o, idx) => `<label><input type="radio" name="q${i + 1}" value="${String.fromCharCode(97 + idx)}"> ${o}</label>`).join("");
+      container.appendChild(div);
+    });
+  </script>
+</body>
+</html>
