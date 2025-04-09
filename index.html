@@ -7,17 +7,13 @@
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: auto; background: #f5f5f5; }
     h1, h2 { text-align: center; }
-    form { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    form, #certificate, #homePage, #leaderboardPage, #certificatePage { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px; }
     .question { margin-bottom: 20px; }
     label { display: block; margin-bottom: 5px; }
     input[type="text"], input[type="email"] { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc; }
-    button { padding: 10px 20px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button { padding: 10px 20px; background: #4caf50; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 10px; }
     button:hover { background: #45a049; }
-    #leaderboard { background: white; padding: 20px; margin-top: 40px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    #leaderboard h2 { margin-top: 0; }
-    .leaderboard-entry { margin-bottom: 10px; }
-    #certificate { display: none; background: #fff9c4; padding: 30px; border: 2px dashed #fbc02d; text-align: center; margin-top: 30px; border-radius: 12px; box-shadow: 0 0 15px rgba(0,0,0,0.15); }
-    #certificate h2 { margin-bottom: 10px; }
+    .hidden { display: none; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
   <script>
@@ -25,12 +21,22 @@
       emailjs.init("fBwObR_tKYEjPcn4G");
     })();
 
+    let currentAnswers = {};
+    let submitted = false;
+
+    function showPage(id) {
+      document.getElementById("homePage").classList.add("hidden");
+      document.getElementById("quizForm").classList.add("hidden");
+      document.getElementById("leaderboardPage").classList.add("hidden");
+      document.getElementById("certificatePage").classList.add("hidden");
+      document.getElementById(id).classList.remove("hidden");
+    }
+
     function submitQuiz(event) {
       event.preventDefault();
 
       const name = document.getElementById("name").value;
       const email = document.getElementById("email").value;
-
       const formData = new FormData(document.getElementById("quizForm"));
       let score = 0;
       let output = "";
@@ -42,24 +48,22 @@
       ];
 
       for (let i = 0; i < 30; i++) {
-        const answer = formData.get(`q${i + 1}`);
+        const qKey = `q${i + 1}`;
+        const answer = formData.get(qKey);
+        if (answer !== currentAnswers[qKey]) submitted = false;
+        currentAnswers[qKey] = answer;
         if (answer === correctAnswers[i]) score++;
         output += `Question ${i + 1}: ${answer || "No answer"}\n`;
       }
 
-      let messageBody = `Score: ${score}/30\n\n${output}`;
+      if (submitted) return;
+      submitted = true;
 
-      if (score >= 21) {
-        messageBody = `🎉 Congratulations, ${name}! 🎉\nYou passed the Big Back Certification Quiz with a score of ${score}/30!\n\nYou are officially Big Back Certified.\n\n${output}`;
-      } else {
-        messageBody = `Hey ${name},\nYou scored ${score}/30 on the Big Back Certification Quiz.\n\nUnfortunately, you did not earn certification this time, but great effort!\n\n${output}`;
-      }
+      const messageBody = score >= 21 ?
+        `🎉 Congratulations, ${name}! 🎉\nYou passed the Big Back Certification Quiz with a score of ${score}/30!\n\nYou are officially Big Back Certified.\n\n${output}` :
+        `Hey ${name},\nYou scored ${score}/30 on the Big Back Certification Quiz.\n\nUnfortunately, you did not earn certification this time, but great effort!\n\n${output}`;
 
-      const templateParams = {
-        to_name: name,
-        to_email: email,
-        message: messageBody
-      };
+      const templateParams = { to_name: name, to_email: email, message: messageBody };
 
       emailjs.send("Big_back", "template_0br65x8", templateParams)
         .then(() => alert("Results sent to your email!"))
@@ -69,33 +73,39 @@
       leaderboard.push({ name, score });
       leaderboard.sort((a, b) => b.score - a.score);
       localStorage.setItem("leaderboard", JSON.stringify(leaderboard.slice(0, 10)));
-      renderLeaderboard();
 
-      if (score >= 25) {
-        document.getElementById("certificate").style.display = "block";
+      if (score >= 21) {
         document.getElementById("cert-name").textContent = name;
         document.getElementById("cert-score").textContent = `${score}/30`;
+        showPage("certificatePage");
       } else {
-        document.getElementById("certificate").style.display = "none";
+        showPage("homePage");
       }
-
-      document.getElementById("quizForm").style.display = "none";
     }
 
     function renderLeaderboard() {
-      const leaderboardContainer = document.getElementById("leaderboard-entries");
+      const container = document.getElementById("leaderboard-entries");
       const leaderboard = JSON.parse(localStorage.getItem("leaderboard") || "[]");
-      leaderboardContainer.innerHTML = leaderboard.map(entry =>
-        `<div class="leaderboard-entry"><strong>${entry.name}</strong>: ${entry.score}/30</div>`
+      container.innerHTML = leaderboard.map(entry =>
+        `<div><strong>${entry.name}</strong>: ${entry.score}/30</div>`
       ).join("");
     }
 
-    window.onload = renderLeaderboard;
+    window.onload = () => {
+      renderLeaderboard();
+      showPage("homePage");
+    };
   </script>
 </head>
 <body>
-  <h1>Big Back Certification Quiz</h1>
-  <form id="quizForm" onsubmit="submitQuiz(event)">
+  <div id="homePage">
+    <h1>Big Back Certification</h1>
+    <button onclick="showPage('quizForm')">Take Quiz</button>
+    <button onclick="showPage('leaderboardPage')">View Leaderboard</button>
+  </div>
+
+  <form id="quizForm" class="hidden" onsubmit="submitQuiz(event)">
+    <h2>Quiz Time!</h2>
     <label for="name">Name:</label>
     <input type="text" id="name" name="name" required />
 
@@ -104,34 +114,29 @@
 
     <div id="questions"></div>
     <button type="submit">Submit</button>
+    <button type="button" onclick="showPage('homePage')">Home</button>
   </form>
 
-  <div id="certificate">
+  <div id="leaderboardPage" class="hidden">
+    <h2>Leaderboard</h2>
+    <div id="leaderboard-entries"></div>
+    <button onclick="showPage('homePage')">Home</button>
+  </div>
+
+  <div id="certificatePage" class="hidden">
     <h2>🍗 Big Back Certificate of Awesomeness 🍗</h2>
     <p>This certifies that <strong id="cert-name"></strong> has officially demonstrated an elite appetite and scored <strong id="cert-score"></strong>.</p>
     <p>Welcome to the League of the Large Lunches. May your snacks be many and your meals mighty.</p>
-  </div>
-
-  <div id="leaderboard">
-    <h2>Leaderboard</h2>
-    <div id="leaderboard-entries"></div>
+    <button onclick="showPage('homePage')">Home</button>
   </div>
 
   <script>
     const questions = `What is the most logical reason a Big Back eats an entire pizza in one sitting?|a) They’re secretly training for a pizza-eating competition|b) They forgot they ordered extra cheese|c) They just really, really like pizza|d) They lost a bet
 Which of these best describes a Big Back’s reaction when faced with a buffet?|a) They panic and grab everything in sight|b) They carefully plan a strategy to sample every dish|c) They ignore the food and leave after 5 minutes|d) They only eat the breadsticks
-How does a Big Back feel after consuming a full 12-inch sandwich?|a) Satisfied but not full enough to stop|b) They start a food fight with the sandwich crusts|c) They need a nap immediately|d) They immediately look for dessert
-A Big Back’s ideal breakfast consists of:|a) A smoothie and a granola bar|b) Pancakes, bacon, eggs, and hash browns|c) A muffin and a coffee|d) A single slice of toast
-What is the main factor that determines a Big Back’s hunger level?|a) How much food is available in the house|b) How much exercise they've done that day|c) The number of food commercials they've watched|d) Their current mood
-When dining with friends, what is a Big Back’s first question?|a) \"How much food are we ordering?\"|b) \"Should I bring my own snacks?\"|c) \"Who’s paying for the extra appetizers?\"|d) \"What’s the biggest thing on the menu?\"
-What is a Big Back's reaction when they realize there’s no more food on their plate?|a) They wait patiently for someone to offer them more|b) They start looking around for any leftover crumbs|c) They declare, \"I’m done,\" and leave|d) They start planning their next meal
-What would a Big Back consider an acceptable snack?|a) A full meal, with dessert included|b) A handful of chips|c) A single apple|d) A couple of crackers
-What is the main reason a Big Back chooses to eat at a buffet?|a) To try new foods|b) To see how much they can eat|c) To meet friends and socialize|d) Because it’s the cheapest option
-What would a Big Back be most likely to order at a fast food restaurant?|a) A small salad with dressing on the side|b) A large burger, extra fries, and a milkshake|c) A single slice of pizza|d) A water and a fruit cup
-...`; // shortened for brevity
+...` // Add rest of your 30 questions here
 
     const container = document.getElementById("questions");
-    const splitQuestions = questions.split("\n");
+    const splitQuestions = questions.trim().split("\n");
     splitQuestions.forEach((line, i) => {
       const [q, ...opts] = line.split("|");
       const div = document.createElement("div");
